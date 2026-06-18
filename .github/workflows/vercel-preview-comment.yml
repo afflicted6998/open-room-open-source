@@ -1,0 +1,47 @@
+name: Comment Vercel preview URL on fork PRs
+
+on:
+  deployment_status:
+
+jobs:
+  comment:
+    if: >
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Preview'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Post preview URL to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.deployment.sha;
+            const previewUrl = context.payload.deployment_status.target_url;
+
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+            });
+
+            const pr = prs.find(p => p.head.sha === sha);
+            if (!pr) return;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+            });
+
+            const alreadyPosted = comments.some(c =>
+              c.user.type === 'Bot' && c.body.includes('Vercel Preview')
+            );
+            if (alreadyPosted) return;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: `### Vercel Preview\n\n🔗 ${previewUrl}\n\nDeployment is ready — click to preview your changes.`,
+            });
