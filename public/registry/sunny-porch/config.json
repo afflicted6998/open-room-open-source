@@ -4,5 +4,16 @@
   "background_image": "/registry/sunny-porch/background.webp",
   "hide_back_button": false,
   "links": [],
-  "hotspots": []
+  "hotspots": [
+    {
+      "id": "random-topic-generator",
+      "label": "Random Topic Generator",
+      "x": 41.9,
+      "y": 5.3,
+      "width": 23.7,
+      "height": 19.2,
+      "action": "open_url",
+      "url": "https://afflicted6998.github.io/disparate-topics-challenge/"
+    }
+  ]
 }
